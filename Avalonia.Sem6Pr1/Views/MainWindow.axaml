@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Avalonia.Sem6Pr1.ViewModels"
+        xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Avalonia.Sem6Pr1.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Avalonia.Sem6Pr1">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <Grid RowDefinitions="*,Auto">
+        <rxui:RoutedViewHost Router="{Binding Router}">
+            <rxui:RoutedViewHost.DefaultContent>
+                <TextBlock HorizontalAlignment="Center"
+                           VerticalAlignment="Center">
+                    Content
+                </TextBlock>
+            </rxui:RoutedViewHost.DefaultContent>
+        </rxui:RoutedViewHost>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Command="{Binding GoNext}">Next</Button>
+            <Button Command="{Binding GoBack}">Back</Button>
+            <TextBlock Text="{Binding Router.NavigationStack.Count}"></TextBlock>
+        </StackPanel>
+    </Grid>
+</Window>
