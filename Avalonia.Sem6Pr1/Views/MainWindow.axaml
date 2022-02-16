@@ -18,7 +18,7 @@
             <rxui:RoutedViewHost.DefaultContent>
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center">
-                    Content
+                    Select a table below
                 </TextBlock>
             </rxui:RoutedViewHost.DefaultContent>
         </rxui:RoutedViewHost>
