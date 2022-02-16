@@ -13,7 +13,9 @@
         <DataGrid
             Name="DataGrid"
             AutoGenerateColumns="True"
+            IsReadOnly="True"
             Items="{Binding Objects}"
+            SelectedIndex="{Binding SelectedIndex}"
             SelectionChanged="DataGrid_OnSelectionChanged"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Command="{Binding Add}">Add</Button>
@@ -31,7 +33,8 @@
                 <ItemsControl.DataTemplates>
                     <DataTemplate>
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="{Binding Name}"></TextBlock>
+                            <TextBlock Text="{Binding Name}"
+                                       Classes.Valid="{Binding !IsValid}"></TextBlock>
                             <TextBox Text="{Binding Value}"></TextBox>
                         </StackPanel>
                     </DataTemplate>
@@ -39,4 +42,10 @@
             </ItemsControl>
         </StackPanel>
     </Grid>
+    
+    <UserControl.Styles>
+        <Style Selector="TextBlock.Valid">
+            <Setter Property="Foreground" Value="Red"></Setter>
+        </Style>
+    </UserControl.Styles>
 </UserControl>

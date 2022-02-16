@@ -19,8 +19,20 @@ public class TableService
         await _context.Set<T>().ForEachAsync(o => itemsDestination.Add(o));
     }
 
-    public void Insert(object o) => _context.Add(o);
-    public void Attach(object o) => _context.Attach(o);
-    public void Delete(object o) => _context.Remove(o);
-    public async Task Save() => await _context.SaveChangesAsync();
+    public void Insert(object o) => _context?.Add(o);
+    public void Attach(object o) => _context?.Attach(o);
+    public void Delete(object o) => _context?.Remove(o);
+
+    public async Task<bool> Save()
+    {
+        try
+        {
+            await _context!.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
 }

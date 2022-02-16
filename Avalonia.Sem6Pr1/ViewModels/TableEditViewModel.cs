@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Avalonia.Controls.Notifications;
 using Avalonia.Sem6Pr1.Attributes;
 using Avalonia.Sem6Pr1.Database;
 using Avalonia.Sem6Pr1.Helpers;
@@ -13,6 +14,7 @@ using Avalonia.Sem6Pr1.Models;
 using JetBrains.Annotations;
 using ReactiveUI;
 using Splat;
+using Notification = System.Reactive.Notification;
 
 namespace Avalonia.Sem6Pr1.ViewModels;
 
@@ -30,8 +32,8 @@ public class TableEditViewModel<T> : TableEditViewModel where T: class, new()
         _tableService = Locator.Current.GetService<TableService>();
         // init commands
         SelectionChanged = ReactiveCommand.Create<int>(UpdateSelection);
-        ApplyEdit = ReactiveCommand.Create(ApplyEditCore);
-        Save = ReactiveCommand.CreateFromTask(_tableService.Save);
+        ApplyEdit = ReactiveCommand.Create(TryApplyEditCore);
+        Save = ReactiveCommand.CreateFromTask(TrySaveCore);
         Add = ReactiveCommand.Create(AddCore);
         Delete = ReactiveCommand.Create(DeleteCore);
         // load model configuration
@@ -51,13 +53,15 @@ public class TableEditViewModel<T> : TableEditViewModel where T: class, new()
             if (notEditableAttributes.Length > 0) continue;
 
             var nameAttributes = p.GetCustomAttributes(typeof(NameAttribute), false);
-            var nameFromAttribute = (nameAttributes.First() as NameAttribute)?.Name;
+            var nameFromAttribute = (nameAttributes.FirstOrDefault() as NameAttribute)?.Name;
 
             var info = new PropertyData(p);
             var memberConfig = _modelConfiguration.Get(p);
             if (memberConfig != null)
             {
                 info.Validator = memberConfig.Validator ?? info.Validator;
+                info.ToStringFunc = memberConfig.ToStringConverter ?? info.ToStringFunc;
+                info.FromStringFunc = memberConfig.FromStringConverter ?? info.FromStringFunc;
                 info.Name = nameFromAttribute ?? memberConfig.Name;
             }
 
@@ -76,9 +80,9 @@ public class TableEditViewModel<T> : TableEditViewModel where T: class, new()
         }
     }
 
-    private void ApplyEditCore()
+    private void TryApplyEditCore()
     {
-        if (SelectedIndex < 0) return;
+        if (SelectedIndex < 0 && SelectedIndex < Objects.Count) return;
         var selected = Objects[SelectedIndex];
         if (SelectedObjectProperties.Any(pd => pd.Validate() != true)) return;
         foreach (var pd in SelectedObjectProperties)
@@ -86,6 +90,18 @@ public class TableEditViewModel<T> : TableEditViewModel where T: class, new()
             pd.SetObjectValue(selected);
         }
         if (selected is IOnPropertyChanged notifyChanges) notifyChanges.OnPropertyChanged("");
+    }
+
+    private async System.Threading.Tasks.Task TrySaveCore()
+    {
+        bool success = await _tableService.Save();
+        if (!success)
+        {
+            var messageBox = MessageBox.Avalonia.MessageBoxManager.GetMessageBoxStandardWindow(
+                "Error",
+                "The changes were not saved. Perhaps there are some invalid or empty fields.");
+            await messageBox.Show();
+        }
     }
 
     private void AddCore()
@@ -143,6 +159,7 @@ public class PropertyData : INotifyPropertyChanged
             try
             {
                 _value = FromStringFunc(value);
+                OnPropertyChanged("");
             }
             catch (Exception)
             {
@@ -150,10 +167,12 @@ public class PropertyData : INotifyPropertyChanged
             }
         }
     }
-    public Func<string?, object?> FromStringFunc { get; } = o => o is string ? o : null;
-    public Func<object?, string?> ToStringFunc { get; } = o => o?.ToString();
-    public Delegate? Validator { get; set; }
-    
+
+    public bool IsValid => Validate() != false;
+    public Func<string?, object?> FromStringFunc { get; set; } = o => o is string ? o : null;
+    public Func<object?, string?> ToStringFunc { get; set; } = o => o?.ToString();
+    public Func<object?, bool?>? Validator { get; set; }
+
 
     public PropertyData(PropertyInfo propertyInfo)
     {
@@ -171,11 +190,11 @@ public class PropertyData : INotifyPropertyChanged
     public void UpdateValue(object source)
     {
         _value = propertyInfo.GetValue(source);
-        OnPropertyChanged(nameof(Value));
+        OnPropertyChanged("");
     }
 
     public void SetObjectValue(object source) => propertyInfo.SetValue(source, _value);
-    public bool? Validate() => Validator != null ? (bool?)Validator.DynamicInvoke(_value) : true;
+    public bool? Validate() => Validator != null ? Validator(_value) : true;
     public event PropertyChangedEventHandler? PropertyChanged;
 
     [NotifyPropertyChangedInvocator]

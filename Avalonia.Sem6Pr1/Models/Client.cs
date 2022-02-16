@@ -12,7 +12,7 @@ using ReactiveUI;
 
 namespace Avalonia.Sem6Pr1.Models;
 
-public class Employee : OnPropertyChangedBase
+public class Client : OnPropertyChangedBase
 {
     [Key] 
     [NotEditable]
@@ -33,6 +33,4 @@ public class Employee : OnPropertyChangedBase
     [Required]
     [Name("Email")]
     public string EmailAddress { get; set; } = "";
-    [ForeignKey(nameof(Department))]
-    public int DepartmentId { get; set; }
 }

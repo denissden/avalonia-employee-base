@@ -23,9 +23,12 @@
             </rxui:RoutedViewHost.DefaultContent>
         </rxui:RoutedViewHost>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <Button Command="{Binding GoNext}">Next</Button>
-            <Button Command="{Binding GoBack}">Back</Button>
-            <TextBlock Text="{Binding Router.NavigationStack.Count}"></TextBlock>
+            <Button Command="{Binding GoEmployees}">Employees</Button>
+            <Button Command="{Binding GoTasks}">Tasks</Button>
+            <Button Command="{Binding GoDepartments}">Departments</Button>
+            <Button Command="{Binding GoClients}">Clients</Button>
+            <Button Command="{Binding GoApplications}">Applications</Button>
+            <!-- <TextBlock Text="{Binding Router.NavigationStack.Count}"></TextBlock> -->
         </StackPanel>
     </Grid>
 </Window>

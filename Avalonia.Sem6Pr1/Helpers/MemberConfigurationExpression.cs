@@ -6,9 +6,9 @@ public class MemberConfigurationExpression<T, TMember>
 {
     public MemberConfiguration Configuration = new();
     
-    public MemberConfigurationExpression<T, TMember> Validate(Func<TMember, bool> validator)
+    public MemberConfigurationExpression<T, TMember> Validate(Func<TMember?, bool> validator)
     {
-        Configuration.Validator = validator;
+        Configuration.Validator = o => validator((TMember?)o);
         return this;
     }
     
@@ -27,6 +27,12 @@ public class MemberConfigurationExpression<T, TMember>
     public MemberConfigurationExpression<T, TMember> Name(string name)
     {
         Configuration.Name = name;
+        return this;
+    }
+    
+    public MemberConfigurationExpression<T, TMember> ValidateNotNull()
+    {
+        Configuration.Validator = o => o != null;
         return this;
     }
 }
