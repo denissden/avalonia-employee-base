@@ -36,7 +36,7 @@ namespace Avalonia.Sem6Pr1
             AddTableEdit<Models.Application>();
             
             // database service
-            string conn = "Host=localhost;Database=avalonia_sem6pr1;Username=user;Password=password";
+            string conn = "Host=localhost;Port=15432;Database=avalonia_sem6pr1;Username=user;Password=password";
             Locator.CurrentMutable.RegisterLazySingleton(() => new AppContext(conn), typeof(DbContext));
             Locator.CurrentMutable.RegisterLazySingleton(() => new TableService(), typeof(TableService));
             
@@ -54,6 +54,8 @@ namespace Avalonia.Sem6Pr1
             var emailRegex = new Regex("^.+@.+[.].+");
             var phoneRegex = new Regex("^[0-9]{10}$");
             var numberRegex = new Regex("^[0-9]*$");
+
+            var _tableService = Locator.Current.GetService<TableService>();
 
             var modelsConfiguration = new ModelsConfiguration(
                 ModelConfiguration.Create<Employee>(c =>
